@@ -9,8 +9,8 @@ library("afex")
 library("BayesFactor")
 
 
-path1 <- "/Users/user/Desktop/DoubleProbe3/data/E1.csv"
-path2 <- "/Users/user/Desktop/DoubleProbe3/data/E2.csv"
+path1 <- "/Users/user/Desktop/Experiments/Nick/DoubleProbe/E3/data/E1.csv"
+path2 <- "/Users/user/Desktop/Experiments/Nick/DoubleProbe/E3/data/E2.csv"
 
 E1 <- read.csv(path1, header=TRUE, as.is=TRUE); E1 <- dplyr::select(E1, -X)
 E2 <- read.csv(path2, header=TRUE, as.is=TRUE); E2 <- dplyr::select(E2, -X)
@@ -45,12 +45,12 @@ for(i in seq(1,dim(data)[1]))
 
 #write.csv(data, file = "/Users/user/Desktop/DoubleProbe3/data/Preprocessed_E1E2.csv", sep=',', eol='\n')
 
-#data <- dplyr::mutate(data, rdif1 = as.circular(theta_1 - rad(angs_1), units="radians")) #don't change this!!
-#data <- dplyr::mutate(data, rdif2 = as.circular(theta_2 - rad(angs_2), units="radians")) #don't change this!!
+data <- dplyr::mutate(data, rdif1 = as.circular(theta_1 - rad(angs_1), units="radians")) #don't change this!!
+data <- dplyr::mutate(data, rdif2 = as.circular(theta_2 - rad(angs_2), units="radians")) #don't change this!!
 
 #if want degrees...
-data <- dplyr::mutate(data, rdif1 = as.circular(resp_1 - angs_1, units="degrees")) #don't change this!!
-data <- dplyr::mutate(data, rdif2 = as.circular(resp_2 - angs_2, units="degrees")) #don't change this!!
+#data <- dplyr::mutate(data, rdif1 = as.circular(resp_1 - angs_1, units="degrees")) #don't change this!!
+#data <- dplyr::mutate(data, rdif2 = as.circular(resp_2 - angs_2, units="degrees")) #don't change this!!
 
 
 neutral <- vector("numeric", length = length(sublist1))
@@ -69,12 +69,12 @@ for(i in sublist1){
   tempneut  <- dplyr::filter(temp, cond == "neutral")
   tempcued1 <- dplyr::filter(temp, cond == "cued1")
   tempcued2 <- dplyr::filter(temp, cond == "cued2")
-  E1precs[count,1] <- mean(abs(tempneut[,14]))
-  E1precs[count,2] <- mean(abs(tempcued1[,14]))
-  E1precs[count,3] <- mean(abs(tempcued2[,14]))
-  E1precs[count,4] <- mean(abs(tempneut[,15]))
-  E1precs[count,5] <- mean(abs(tempcued2[,15]))
-  E1precs[count,6] <- mean(abs(tempcued1[,15]))
+  E1precs[count,1] <- 1/sd(tempneut[,14]);# E1precs[count,1] <- mean(abs(tempneut[,14]))
+  E1precs[count,2] <- 1/sd(tempcued1[,14]);# E1precs[count,2] <- mean(abs(tempcued1[,14]))
+  E1precs[count,3] <- 1/sd(tempcued2[,14]);# E1precs[count,3] <- mean(abs(tempcued2[,14]))
+  E1precs[count,4] <- 1/sd(tempneut[,15]);# E1precs[count,4] <- mean(abs(tempneut[,15]))
+  E1precs[count,5] <- 1/sd(tempcued2[,15]);# E1precs[count,5] <- mean(abs(tempcued2[,15]))
+  E1precs[count,6] <- 1/sd(tempcued1[,15]);# E1precs[count,6] <- mean(abs(tempcued1[,15]))
   count <- count + 1
 } # put Experiment 1 accuracy data into matrix of Participant x Condition
 count <- 1
@@ -83,12 +83,12 @@ for(i in sublist2){
   tempneut  <- dplyr::filter(temp, cond == "neutral")
   tempcued1 <- dplyr::filter(temp, cond == "cued1")
   tempcued2 <- dplyr::filter(temp, cond == "cued2")
-  E2precs[count,1] <- mean(abs(tempneut[,14]))
-  E2precs[count,2] <- mean(abs(tempcued1[,14]))
-  E2precs[count,3] <- mean(abs(tempcued2[,14]))
-  E2precs[count,4] <- mean(abs(tempneut[,15]))
-  E2precs[count,5] <- mean(abs(tempcued2[,15]))
-  E2precs[count,6] <- mean(abs(tempcued1[,15]))
+  E2precs[count,1] <- 1/sd(tempneut[,14]);# E2precs[count,1] <- mean(abs(tempneut[,14]))
+  E2precs[count,2] <- 1/sd(tempcued1[,14]);# E2precs[count,2] <- mean(abs(tempcued1[,14]))
+  E2precs[count,3] <- 1/sd(tempcued2[,14]);# E2precs[count,3] <- mean(abs(tempcued2[,14]))
+  E2precs[count,4] <- 1/sd(tempneut[,15]);# E2precs[count,4] <- mean(abs(tempneut[,15]))
+  E2precs[count,5] <- 1/sd(tempcued2[,15]);# E2precs[count,5] <- mean(abs(tempcued2[,15]))
+  E2precs[count,6] <- 1/sd(tempcued1[,15]);# E2precs[count,6] <- mean(abs(tempcued1[,15]))
   count <- count + 1
 } # put Experiment 2 accuracy data into matrix of Participant x Condition
 
@@ -251,6 +251,11 @@ E1_NeutralUncued$probe <- as.character(E1_NeutralUncued$probe); E1_NeutralUncued
 aov_E1_NU <- aov_ez('id', 'accuracy', data = E1_NeutralUncued, within = c("probe", "cue"))
 nice(aov_E1_NU, es = 'pes')
 bf_E1_NU <- anovaBF(accuracy ~id + cue*probe, data = E1_NeutralUncued, whichRandom = 'id', iterations = 200000, progress = TRUE, whichModels = "withmain")
+lmbf_E1_NU_full <- lmBF(accuracy ~ id + cue + probe + cue:probe,
+                        data = E1_NeutralUncued, whichRandom = 'id', iterations = 200000)
+lmbf_E1_NU_main <- lmBF(accuracy ~ id + cue + probe,
+                        data = E1_NeutralUncued, whichRandom = 'id', iterations = 200000)
+lmbf_E1_NU_full/lmbf_E1_NU_main # evidence for interaction of cue and probe in neutral vs. uncued trials in Experiment 1
 
 E1_NeutralCued <- dplyr::filter(E1acc, cue == "neutral" | cue == "cued")
 E1_NeutralCued$id <- as.factor(E1_NeutralCued$id)
@@ -262,13 +267,20 @@ bf_E1_NC <- anovaBF(accuracy ~id + cue*probe, data = E1_NeutralCued, whichRandom
 # using bf_E1_NC[7]/bf_E1_NC[4] as the probe:cue interaction, get BF 1.09. probe:cue + id against id (bf_E1_NC[3]) gives BF = 0.593
 
 bf_tE1_NC1 <- ttestBF(x = E1precs$n1, y = E1precs$c1, paired = TRUE); bf_tE1_NC2 <- ttestBF(x = E1precs$n2, y = E1precs$c2, paired = TRUE)
+tE1_NC1    <- t.test(x = E1precs$n1, y = E1precs$c1, paired = TRUE) ; tE1_NC2    <- t.test( x = E1precs$n2, y = E1precs$c2, paired = TRUE)
 bf_tE1_NU1 <- ttestBF(x = E1precs$n1, y = E1precs$u1, paired = TRUE); bf_tE1_NU2 <- ttestBF(x = E1precs$n2, y = E1precs$u2, paired = TRUE)
+tE1_NU1    <- t.test(x = E1precs$n1, y = E1precs$u1, paired = TRUE) ; tE1_NU2    <- t.test( x = E1precs$n2, y = E1precs$u2, paired = TRUE)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 E2acc$cue <- as.factor(E2acc$cue); E2acc$probe <- as.factor(E2acc$probe); E2acc$id <- as.factor(E2acc$id); E2acc$experiment <- as.factor(E2acc$experiment)
 aov_E2 <- aov_ez('id', 'accuracy', data = E2acc, within = c("probe", "cue"))
 nice(aov_E2, es = 'pes')
-bf_E2 <- anovaBF(accuracy ~id + cue*probe, data = E2acc, whichRandom = 'id', iterations = 200000, progress = TRUE, whichModels = "withmain")
+bf_E2 <- anovaBF(accuracy ~ id + cue*probe, data = E2acc, whichRandom = 'id', iterations = 200000, progress = TRUE, whichModels = "withmain")
+lmbf_E2_full <- lmBF(accuracy ~ id + cue + probe + cue:probe,
+                     data = E2acc, whichRandom = 'id', iterations = 200000)
+lmbf_E2_main <- lmBF(accuracy ~ id + cue + probe,
+                     data = E2acc, whichRandom = 'id', iterations = 200000)
+lmbf_E2_full/lmbf_E2_main #evidence for interaction of cue and probe in Experiment 2
 
 E2_NeutralUncued <- dplyr::filter(E2acc, cue == "neutral" | cue == "uncued")
 E2_NeutralUncued$id <- as.factor(E2_NeutralUncued$id)
@@ -277,6 +289,12 @@ E2_NeutralUncued$probe <- as.character(E2_NeutralUncued$probe); E2_NeutralUncued
 aov_E2_NU <- aov_ez('id', 'accuracy', data = E2_NeutralUncued, within = c("probe", "cue"))
 nice(aov_E2_NU, es = 'pes')
 bf_E2_NU <- anovaBF(accuracy ~id + cue*probe, data = E2_NeutralUncued, whichRandom = 'id', iterations = 200000, progress = TRUE, whichModels = "withmain")
+
+lmbf_E2_NU_full <- lmBF(accuracy ~ id + cue + probe + cue:probe,
+                        data = E2_NeutralUncued, whichRandom= 'id', iterations = 200000)
+lmbf_E2_NU_main <- lmBF(accuracy ~ id + cue + probe,
+                        data = E2_NeutralUncued, whichRandom = 'id', iterations = 200000)
+lmbf_E2_NU_full/lmbf_E2_NU_main # evidence for interaction between cue and probe factors in neutral and uncued trials in Experiment 2
 
 
 E2_NeutralCued <- dplyr::filter(E2acc, cue == "neutral" | cue == "cued")
@@ -287,9 +305,18 @@ aov_E2_NC <- aov_ez('id', 'accuracy', data = E2_NeutralCued, within = c("probe",
 nice(aov_E2_NC, es = 'pes')
 bf_E2_NC <- anovaBF(accuracy ~id + cue*probe, data = E2_NeutralCued, whichRandom = 'id', iterations = 200000, progress = TRUE, whichModels = "withmain")
 
+lmbf_E2_NC_full <- lmBF(accuracy ~ id + cue + probe + cue:probe,
+                        data = E2_NeutralCued, whichRandom= 'id', iterations = 200000)
+lmbf_E2_NC_main <- lmBF(accuracy ~ id + cue + probe,
+                        data = E2_NeutralCued, whichRandom = 'id', iterations = 200000)
+lmbf_E2_NC_full/lmbf_E2_NC_main # evidence for interaction between cue and probe factors in neutral and cued trials in Experiment 2
+
+
 
 bf_tE2_NC1 <- ttestBF(x = E2precs$n1, y = E2precs$c1, paired = TRUE); bf_tE2_NC2 <- ttestBF(x = E2precs$n2, y = E2precs$c2, paired = TRUE)
+tE2_NC1    <- t.test(x = E2precs$n1, y = E2precs$c1, paired = TRUE) ; tE2_NC2    <- t.test( x = E2precs$n2, y = E2precs$c2, paired = TRUE)
 bf_tE2_NU1 <- ttestBF(x = E2precs$n1, y = E2precs$u1, paired = TRUE); bf_tE2_NU2 <- ttestBF(x = E2precs$n2, y = E2precs$u2, paired = TRUE)
+tE2_NU1    <- t.test(x = E2precs$n1, y = E2precs$u1, paired = TRUE) ; tE2_NU2    <- t.test( x = E2precs$n2, y = E2precs$u2, paired = TRUE)
 
 # # # # Mixed Effects Models for between-experiment analysis # # # #
 
