@@ -245,20 +245,20 @@ plotPrecs_NeutralCued$Experiment <- as.factor(plotPrecs_NeutralCued$Experiment)
 plotPrecs_NeutralUncued$Experiment <- as.factor(plotPrecs_NeutralUncued$Experiment)
 
 
-aov_neutralcued     <- aov_ez('id', 'Precision', plotPrecs_NeutralCued, within = c("Cue","Probe", "Experiment")); 
-aov_neutralcued_old <- aov_ez('id', 'Precision', plotPrecsOld_NeutralCued, within = c("Cue", "Probe"))          ; 
-aov_neutralcued_new <- aov_ez('id', 'Precision', plotPrecsNew_NeutralCued, within = c("Cue", "Probe"))          ; 
+aov_neutralcued     <- aov_ez('id', 'Precision', plotPrecs_NeutralCued, within = c("Cue","Probe", "Experiment")); nice(aov_neutralcued,     es = 'pes')
+aov_neutralcued_old <- aov_ez('id', 'Precision', plotPrecsOld_NeutralCued, within = c("Cue", "Probe"))          ; nice(aov_neutralcued_old, es = 'pes')
+aov_neutralcued_new <- aov_ez('id', 'Precision', plotPrecsNew_NeutralCued, within = c("Cue", "Probe"))          ; nice(aov_neutralcued_new, es = 'pes')
 
 n1c1_old <- t.test(precs_old$n1, precs_old$c1, paired=TRUE); n1c1old_effsize <- cohens_d(precs_old$n1, precs_old$c1)
 n2c2_old <- t.test(precs_old$n2, precs_old$c2, paired=TRUE); n2c2old_effsize <- cohens_d(precs_old$n2, precs_old$c2)
 n1u1_old <- t.test(precs_old$n1, precs_old$u1, paired=TRUE); n1u1old_effsize <- cohens_d(precs_old$n1, precs_old$u1)
 n2u2_old <- t.test(precs_old$n2, precs_old$u2, paired=TRUE); n2u2old_effsize <- cohens_d(precs_old$n2, precs_old$u2)
 
-aov_neutraluncued     <- aov_ez('id', 'Precision', plotPrecs_NeutralUncued, within = c("Cue","Probe", "Experiment"))
+aov_neutraluncued     <- aov_ez('id', 'Precision', plotPrecs_NeutralUncued, within = c("Cue","Probe", "Experiment")); nice(aov_neutraluncued, es = 'pes')
 bf_neutraluncued      <- anovaBF(Precision ~ id + Cue*Probe*Experiment, data = plotPrecs_NeutralUncued, whichRandom = 'id', iterations = 200000, progress = TRUE, whichModels = "withmain")
 
-aov_neutraluncued_old <- aov_ez('id', 'Precision', plotPrecsOld_NeutralUncued, within = c("Cue", "Probe"))
-aov_neutraluncued_new <- aov_ez('id', 'Precision', plotPrecsNew_NeutralUncued, within = c("Cue", "Probe"))
+aov_neutraluncued_old <- aov_ez('id', 'Precision', plotPrecsOld_NeutralUncued, within = c("Cue", "Probe")); nice(aov_neutraluncued_old, es = 'pes')
+aov_neutraluncued_new <- aov_ez('id', 'Precision', plotPrecsNew_NeutralUncued, within = c("Cue", "Probe")); nice(aov_neutraluncued_new, es = 'pes')
 
 n1c1_new <- t.test(precs_new$n1, precs_new$c1, paired=TRUE); n1c1_new_effsize <- cohens_d(precs_new$n1, precs_new$c1)
 n2c2_new <- t.test(precs_new$n2, precs_new$c2, paired=TRUE); n2c2_new_effsize <- cohens_d(precs_new$n2, precs_new$c2)
@@ -291,8 +291,36 @@ bf_all[3]/bf_all[8] #bayes factor for argument against an Experiment effect
 #i.e. yields BF of ~5.7, strong evidence that there is no effect of Experiment on Precision (performance no significantly better or worse between block types)
 # a model without an effect of experiment fares 6.58 times better
 
-bf_neutralcued_old     <- anovaBF(Precision ~ id + Cue*Probe, data = plotPrecsOld_NeutralCued,   whichRandom="id", iterations=200000, progress=TRUE, whichModels = "withmain")
-bf_neutraluncued_old   <- anovaBF(Precision ~ id + Cue*Probe, data = plotPrecsOld_NeutralUncued, whichRandom="id", iterations=200000, progress=TRUE, whichModels = "withmain")
+bf_neutralcued_old     <- anovaBF(Precision ~ id + Cue*Probe,        data = plotPrecsOld_NeutralCued,   whichRandom="id", iterations=200000, progress=TRUE, whichModels = "withmain")
+bf_neutraluncued_old   <- anovaBF(Precision ~ id + Cue*Probe,       data = plotPrecsOld_NeutralUncued, whichRandom="id", iterations=200000, progress=TRUE, whichModels = "withmain")
+bf_neutralcued_new     <- anovaBF(Precision ~ id + Cue*Probe, data = plotPrecsNew_NeutralCued, whichRandom="id", iterations=200000, progress=TRUE, whichModels = "withmain")
+bf_neutraluncued_new   <- anovaBF(Precision ~ id + Cue*Probe, data = plotPrecsNew_NeutralUncued, whichRandom="id", iterations=200000, progress=TRUE, whichModels = "withmain")
+
+
+lmbf_old_full <- lmBF(Precision ~ id + Cue + Probe + Cue:Probe, data = plotPrecsOld, whichRandom= 'id', iterations = 200000)
+lmbf_old_main <- lmBF(Precision ~ id + Cue + Probe,             data = plotPrecsOld, whichRandom= 'id', iterations = 200000)
+lmbf_old_full/lmbf_old_main #evidence for interaction of cue and probe factors in Experiment 3 blocktype = order not cued
+
+lmbf_old_NC_full <- lmBF(Precision ~ id + Cue + Probe + Cue:Probe,   data = plotPrecsOld_NeutralCued, whichRandom = 'id', iterations  = 200000)
+lmbf_old_NC_main <- lmBF(Precision ~ id + Cue + Probe,               data = plotPrecsOld_NeutralCued, whichRandom = 'id', iterations  = 200000)
+lmbf_old_NC_full/lmbf_old_NC_main # evidence for cue:probe interaction when comparing cue and probe in only neutral and cued trials, blocktype = order not cued
+
+lmbf_old_NU_full <- lmBF(Precision ~ id + Cue + Probe + Cue:Probe,  data = plotPrecsOld_NeutralUncued, whichRandom = 'id', iterations  = 200000)
+lmbf_old_NU_main <- lmBF(Precision ~ id + Cue + Probe,              data = plotPrecsOld_NeutralUncued, whichRandom = 'id', iterations  = 200000)
+lmbf_old_NU_full/lmbf_old_NU_main # evidence for cue:probe interaction when comparing cue and probe in only neutral and cued trials, blocktype = order not cued
+
+
+lmbf_new_full <- lmBF(Precision ~ id + Cue + Probe + Cue:Probe, data = plotPrecsNew, whichRandom= 'id', iterations = 200000)
+lmbf_new_main <- lmBF(Precision ~ id + Cue + Probe,             data = plotPrecsNew, whichRandom= 'id', iterations = 200000)
+lmbf_new_full/lmbf_new_main #evidence for interaction of cue and probe factors in Experiment 3 blocktype = order not cued
+
+lmbf_new_NC_full <- lmBF(Precision ~ id + Cue + Probe + Cue:Probe,   data = plotPrecsNew_NeutralCued, whichRandom = 'id', iterations  = 200000)
+lmbf_new_NC_main <- lmBF(Precision ~ id + Cue + Probe,               data = plotPrecsNew_NeutralCued, whichRandom = 'id', iterations  = 200000)
+lmbf_new_NC_full/lmbf_new_NC_main # evidence for cue:probe interaction when comparing cue and probe in only neutral and cued trials, blocktype = order not cued
+
+lmbf_new_NU_full <- lmBF(Precision ~ id + Cue + Probe + Cue:Probe,  data = plotPrecsNew_NeutralUncued, whichRandom = 'id', iterations  = 200000)
+lmbf_new_NU_main <- lmBF(Precision ~ id + Cue + Probe,              data = plotPrecsNew_NeutralUncued, whichRandom = 'id', iterations  = 200000)
+lmbf_new_NU_full/lmbf_new_NU_main # evidence for cue:probe interaction when comparing cue and probe in only neutral and cued trials, blocktype = order not cued
 
 
 bf_n1c1_old <- ttestBF(x=precs_old$c1, y=precs_old$n1, paired=TRUE)
@@ -301,8 +329,6 @@ bf_n2c2_old <- ttestBF(x=precs_old$c2, y=precs_old$n2, paired=TRUE)
 bf_n2u2_old <- ttestBF(x=precs_old$u2, y=precs_old$n2, paired=TRUE)
 
 
-bf_neutralcued_new   <- generalTestBF(Precision ~ Cue*Probe, data=plotPrecsNew_NeutralCued, whichRandom='id', neverExclude='id', whichModels = "all")
-bf_neutraluncued_new <- generalTestBF(Precision ~ Cue*Probe, data=plotPrecsNew_NeutralUncued, whichRandom='id', neverExclude='id', whichModels = "all")
 bf_n1c1_new <- ttestBF(x=precs_new$c1, y=precs_new$n1, paired=TRUE)
 bf_n1u1_new <- ttestBF(x=precs_new$u1, y=precs_new$n1, paired=TRUE)
 bf_n2c2_new <- ttestBF(x=precs_new$c2, y=precs_new$n2, paired=TRUE)
