@@ -242,7 +242,13 @@ lmbf_E1_full/lmbf_E1_ModelProbeCue
 # when the model comparisons are appropriate
 # suggests that it doesnt matter which we use, but stick to anovaBF as it compares to between-subjects variance as a default, so the bayesfactors are more useful, i think
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+cohens_d <- function(x,y){
+  m1 <- base::mean(x); l1 = length(x); variance1 <- stats::var(x); 
+  m2 <- base::mean(y); l2 = length(y); variance2 <- stats::var(y)
+  sigma <- (sqrt((l1-1)*variance1 + (l2-1)*variance2)/(l1 + l2 - 2))
+  d <- (m1-m2)/sigma
+  return(d)
+}
 
 E1_NeutralUncued <- dplyr::filter(E1acc, cue == "neutral" | cue == "uncued")
 E1_NeutralUncued$id <- as.factor(E1_NeutralUncued$id)
@@ -270,6 +276,8 @@ bf_tE1_NC1 <- ttestBF(x = E1precs$n1, y = E1precs$c1, paired = TRUE); bf_tE1_NC2
 tE1_NC1    <- t.test(x = E1precs$n1, y = E1precs$c1, paired = TRUE) ; tE1_NC2    <- t.test( x = E1precs$n2, y = E1precs$c2, paired = TRUE)
 bf_tE1_NU1 <- ttestBF(x = E1precs$n1, y = E1precs$u1, paired = TRUE); bf_tE1_NU2 <- ttestBF(x = E1precs$n2, y = E1precs$u2, paired = TRUE)
 tE1_NU1    <- t.test(x = E1precs$n1, y = E1precs$u1, paired = TRUE) ; tE1_NU2    <- t.test( x = E1precs$n2, y = E1precs$u2, paired = TRUE)
+tE1_NU1_es <- cohens_d(E1precs$n1, E1precs$u1);                       tE1_NU2_es <- cohens_d(E1precs$n2, E1precs$u2)
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 E2acc$cue <- as.factor(E2acc$cue); E2acc$probe <- as.factor(E2acc$probe); E2acc$id <- as.factor(E2acc$id); E2acc$experiment <- as.factor(E2acc$experiment)

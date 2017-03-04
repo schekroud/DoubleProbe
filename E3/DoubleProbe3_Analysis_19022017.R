@@ -148,8 +148,29 @@ ggplot(prec_new, aes(x=probe, y=precision)) + #generate ggplot, plotting probe a
   theme(panel.background = element_rect(fill = "white"), panel.grid.minor = element_blank(), axis.text = element_text(size = 14)) + ylim(0,2.0)
 dev.off()
 #------------------------------------------------------------------------------------------------------------------------
+# quickly check uncued costs in both block types, and compare
+cohens_d <- function(x,y){
+  m1 <- base::mean(x); l1 = length(x); variance1 <- stats::var(x); 
+  m2 <- base::mean(y); l2 = length(y); variance2 <- stats::var(y)
+  sigma <- (sqrt((l1-1)*variance1 + (l2-1)*variance2)/(l1 + l2 - 2))
+  d <- (m1-m2)/sigma
+  return(d)
+}
 
+uncuedcost_old <- dplyr::select(precs_old, -c1, -c2)
+uncuedcost_old <- dplyr::mutate(uncuedcost_old, cost1 = n1 - u1);  uncuedcost_old <- dplyr::mutate(uncuedcost_old, cost2 = n2 - u2)
+uncuedcost_old <- dplyr::select(uncuedcost_old, -n1, - n2, - u1, -u2)
 
+uncuedcost_new <- dplyr::select(precs_new, -c1, -c2)
+uncuedcost_new <- dplyr::mutate(uncuedcost_new, cost1 = n1 - u1);  uncuedcost_new <- dplyr::mutate(uncuedcost_new, cost2 = n2 - u2)
+uncuedcost_new <- dplyr::select(uncuedcost_new, -n1, - n2, - u1, -u2)
+
+t.test(uncuedcost_old$cost1, uncuedcost_old$cost2, paired = TRUE); ttestBF(x = uncuedcost_old$cost1, y = uncuedcost_old$cost2, paired = TRUE); cohens_d(uncuedcost_old$cost1, uncuedcost_old$cost2)
+t.test(uncuedcost_new$cost1, uncuedcost_new$cost2, paired = TRUE); ttestBF(x = uncuedcost_new$cost1, y = uncuedcost_new$cost2, paired = TRUE); cohens_d(uncuedcost_new$cost1, uncuedcost_new$cost2)
+
+t.test(precs_old$n1, precs_old$n2, paired = TRUE)
+t.test(precs_new$n1, precs_new$n2, paired = TRUE)
+#
 ##### not for plotting, but actually for ANOVAs
 #plotsubs <- c(2,3,4,5,6,7,8,9,11,12,13,14,15,16,17)
 plotsubs <- c(1:20) #just using plotsubs now instead of sublist as we only have 20 in the dframes being used, plus only using 20 subs
@@ -211,14 +232,6 @@ plotPrecsOld$Probe <- as.factor(plotPrecsOld$Probe); plotPrecsOld$Experiment <- 
 
 plotPrecsNew$id <- as.factor(plotPrecsNew$id); plotPrecsNew$Cue <- as.factor(plotPrecsNew$Cue);
 plotPrecsNew$Probe <- as.factor(plotPrecsNew$Probe); plotPrecsNew$Experiment <- as.factor(plotPrecsNew$Experiment)
-
-cohens_d <- function(x,y){
-  m1 <- base::mean(x); l1 = length(x); variance1 <- stats::var(x); 
-  m2 <- base::mean(y); l2 = length(y); variance2 <- stats::var(y)
-  sigma <- (sqrt((l1-1)*variance1 + (l2-1)*variance2)/(l1 + l2 - 2))
-  d <- (m1-m2)/sigma
-  return(d)
-}
 
 aov_old <- aov_ez('id', 'Precision', plotPrecsOld, within = c("Cue", "Probe"))              ; nice(aov_old, es='pes')
 aov_new <- aov_ez('id', 'Precision', plotPrecsNew, within = c("Cue", "Probe"))              ; nice(aov_new, es='pes')
