@@ -31,6 +31,8 @@ for(i in seq(1,dim(EEG)[1]))
 EEG <- dplyr::mutate(EEG, rdif1 = as.circular(theta_1 - rad(angs_1), units="radians")) #don't change this!!
 EEG <- dplyr::mutate(EEG, rdif2 = as.circular(theta_2 - rad(angs_2), units="radians")) #don't change this!!
 
+EEG <- dplyr::filter(EEG, time_1 != Inf & time_2 != Inf)
+
 neutral <- vector("numeric", length = length(sublist))
 cued    <- vector("numeric", length = length(sublist))
 uncued  <- vector("numeric", length = length(sublist))
@@ -44,12 +46,12 @@ for(i in sublist){
   tempneut  <- dplyr::filter(temp, cond == "neutral")
   tempcued1 <- dplyr::filter(temp, cond == "cued1")
   tempcued2 <- dplyr::filter(temp, cond == "cued2")
-  accs[count,1] <- 1/sd(tempneut[,14]);# E1precs[count,1] <- mean(abs(tempneut[,14]))
-  accs[count,2] <- 1/sd(tempcued1[,14]);# E1precs[count,2] <- mean(abs(tempcued1[,14]))
-  accs[count,3] <- 1/sd(tempcued2[,14]);# E1precs[count,3] <- mean(abs(tempcued2[,14]))
-  accs[count,4] <- 1/sd(tempneut[,15]);# E1precs[count,4] <- mean(abs(tempneut[,15]))
-  accs[count,5] <- 1/sd(tempcued2[,15]);# E1precs[count,5] <- mean(abs(tempcued2[,15]))
-  accs[count,6] <- 1/sd(tempcued1[,15]);# E1precs[count,6] <- mean(abs(tempcued1[,15]))
+  accs[i,1] <- 1/sd(tempneut[,14]);# E1precs[count,1] <- mean(abs(tempneut[,14]))
+  accs[i,2] <- 1/sd(tempcued1[,14]);# E1precs[count,2] <- mean(abs(tempcued1[,14]))
+  accs[i,3] <- 1/sd(tempcued2[,14]);# E1precs[count,3] <- mean(abs(tempcued2[,14]))
+  accs[i,4] <- 1/sd(tempneut[,15]);# E1precs[count,4] <- mean(abs(tempneut[,15]))
+  accs[i,5] <- 1/sd(tempcued2[,15]);# E1precs[count,5] <- mean(abs(tempcued2[,15]))
+  accs[i,6] <- 1/sd(tempcued1[,15]);# E1precs[count,6] <- mean(abs(tempcued1[,15]))
   count <- count + 1
 }
 
@@ -76,8 +78,8 @@ ggplot(accuracy, aes(x=probe, y=accuracy)) + #generate ggplot, plotting probe an
   #plot the error bars
   geom_errorbar(aes(x=probe, ymin=accuracy-sem, ymax = accuracy+sem, fill = condition), stat="identity", position=position_dodge(0.9), width = 0.1) +
   scale_colour_manual(values = c("cued" = "#000000" , "neutral" = "#000000", "uncued" = "#000000")) + #set colour of errs manually
-  #geom_point(data=plotprecs, aes(x=probe, y=precision, fill = cue), position = position_dodge(0.9)) + #plot individual people
-  theme(panel.background = element_rect(fill = "white"), panel.grid.minor = element_blank(), axis.text = element_text(size = 14)) #+ ylim(0,1.6)
+  theme(panel.background = element_rect(fill = "white"), panel.grid.minor = element_blank(), axis.text = element_text(size = 14))
+#+ ylim(0,1.6)
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 
